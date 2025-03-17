@@ -65,7 +65,7 @@ namespace MoonlightAppImport
                     metadata.Add(new GameMetadata()
                     {
                         Name = app.name,
-                        GameId = app.uuid,
+                        GameId = app.uuid ?? $"{hostname}-{app.name}",
                         GameActions = new List<GameAction>()
                         {
                             new GameAction()
