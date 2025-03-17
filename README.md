@@ -1,14 +1,10 @@
 # MoonlightAppImport
 A [Playnite](https://github.com/JosefNemec/Playnite) Plugin to import games from a [Sunshine](https://github.com/LizardByte/Sunshine) or [Apollo](https://github.com/ClassicOldSong/Apollo) server to Playnite and open them directly with [Moonlight](https://github.com/moonlight-stream/moonlight-qt).
-
 With using this plugin there is no need to open the Moonlight UI ever again, except for configuring the stream quality.
 
 For example, you could have a Mini-PC as your client in your living room and open Playnite in Fullscreen Mode at launch.
-
 Then you could navigate to your favourite game using the controller only and just launch it. If you are done playing, exit the game normally. The Moonlight stream will end and Playnite will be back to focus.
-
 From here you can choose to open another game or shut down the PC.
-
 All from Playnite! Offering you the true Console Experience!
 ## Features
 - Works with Sunshine and Apollo hosts
