@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="MoonlightAppImport.MoonlightAppImportSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="600">
+    <StackPanel Margin="10">
+        <StackPanel.Resources>
+            <Style TargetType="{x:Type TextBox}">
+                <Setter Property="Margin" Value="0,0,0,10"/>
+            </Style>
+            <Style TargetType="{x:Type CheckBox}">
+                <Setter Property="Margin" Value="0,0,0,10"/>
+            </Style>
+        </StackPanel.Resources>
+        <TextBlock Text="Enter the path to the Moonlight.exe:"/>
+        <TextBox Text="{Binding Settings.MoonlightPath}"/>
+        <TextBlock Text="Enter the host address of the Sunshine server withouth http or port (e.g. 192.168.1.69 or localhost):"/>
+        <TextBox Text="{Binding Settings.SunshineHost}"/>
+        <TextBlock Text="Enter the username for the Sunshine server:"/>
+        <TextBox Text="{Binding Settings.SunshineUsername}"/>
+        <TextBlock Text="Enter the password for the Sunshine server (encrypted using your Windows Account):"/>
+        <TextBox Text="{Binding Settings.SunshinePassword}"/>
+        <TextBlock Text="Is the Sunshine server actually an Apollo server?"/>
+        <CheckBox IsChecked="{Binding Settings.IsApollo}"/>
+        <TextBlock Text="Skip certificate validation? You should check this if the Sunshine server does not have a valid certificate."/>
+        <CheckBox IsChecked="{Binding Settings.SkipCertificateValidation}"/>
+    </StackPanel>
+</UserControl>
