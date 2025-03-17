@@ -23,7 +23,7 @@ All from Playnite! Offering you the true Console Experience!
 ## Best Practices
 I suggest the following setup:
 - A Server with [Apollo](https://github.com/ClassicOldSong/Apollo), [Playnite](https://github.com/JosefNemec/Playnite) and the plugins [SunshineAppExport](https://github.com/MichaelMKenny/SunshineAppExport) and [PlayNiteWatcher](https://github.com/Nonary/PlayNiteWatcher).
-- A Client with [Playnite](https://github.com/JosefNemec/Playnite) and [MoonlightAppImport](https://github.com/SolemnDucc/MoonlightAppImport/)
+- A Client with [Moonlight](https://github.com/moonlight-stream/moonlight-qt), [Playnite](https://github.com/JosefNemec/Playnite) and [MoonlightAppImport](https://github.com/SolemnDucc/MoonlightAppImport/)
 
 Then you would do the following if you want to play a game in Moonlight:
 1. Download and install the game on the server.
