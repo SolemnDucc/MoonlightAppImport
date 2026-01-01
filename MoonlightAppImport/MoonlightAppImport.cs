@@ -70,8 +70,8 @@ namespace MoonlightAppImport
                     bool online = httpClient.IsServerOnlineAsync().GetAwaiter().GetResult();
                     if (!online)
                     {
-                        _logger.Error($"Tried to ping the Sunshine server {settings.Settings.SunshineHost} but failed. The Sunshine server is not online or the host address is wrong!");
-                        throw new TimeoutException($"Tried to ping the Sunshine server {settings.Settings.SunshineHost} but failed. The Sunshine server is not online or the host address is wrong!");
+                        _logger.Error($"Tried to ping the Sunshine server \"{settings.Settings.SunshineHost}\" but failed. The Sunshine server is not online or the host address is wrong!");
+                        throw new TimeoutException($"Tried to ping the Sunshine server \"{settings.Settings.SunshineHost}\" but failed. The Sunshine server is not online or the host address is wrong!");
                     }
                 }
 

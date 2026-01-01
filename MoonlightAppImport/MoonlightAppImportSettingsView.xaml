@@ -15,59 +15,71 @@
                 <x:Type TypeName="my:ServerType"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <!-- Cache the theme styles first (prevents circular BasedOn references) -->
+        <Style x:Key="ThemeTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}" />
+        <Style x:Key="ThemeCheckBoxStyle" TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}" />
+        <Style x:Key="ThemeSeparatorStyle" TargetType="{x:Type Separator}" BasedOn="{StaticResource {x:Type Separator}}" />
     </UserControl.Resources>
-    <StackPanel Margin="10">
+    <StackPanel Margin="10" VerticalAlignment="Top">
         <StackPanel.Resources>
-            <Style TargetType="{x:Type TextBox}">
-                <Setter Property="Margin" Value="10,0,0,0"/>
+            <!-- Implicit overrides: only set the properties to change -->
+            <Style x:Key="SettingsTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource ThemeTextBoxStyle}">
                 <Setter Property="Height" Value="22"/>
+                <Setter Property="Width" Value="400"/>
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
             </Style>
-            <Style TargetType="{x:Type CheckBox}">
+            <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource ThemeCheckBoxStyle}">
                 <Setter Property="Margin" Value="0,0,10,0"/>
             </Style>
-            <Style TargetType="{x:Type ComboBox}">
-                <Setter Property="Margin" Value="10,0,0,0"/>
-                <Setter Property="MinWidth" Value="100"/>
+            <Style TargetType="{x:Type Separator}" BasedOn="{StaticResource ThemeSeparatorStyle}">
+                <Setter Property="Margin" Value="0,0,0,10"/>
             </Style>
             <Style TargetType="{x:Type StackPanel}">
                 <Setter Property="Margin" Value="0,0,0,10"/>
-            </Style>
-            <Style TargetType="{x:Type Separator}">
-                <Setter Property="Margin" Value="0,0,0,10"/>
+                <Setter Property="VerticalAlignment" Value="Center" />
             </Style>
         </StackPanel.Resources>
-        <TextBlock Text="Moonlight App Import Settings" Margin="0,0,0,10" TextDecorations="Underline" TextOptions.TextFormattingMode="Display" FontSize="15"/>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock Text="Enter the path to the Moonlight.exe:"/>
-            <TextBox Width="378" Text="{Binding Settings.MoonlightPath}"/>
+        <!--Header-->
+        <TextBlock Text="Moonlight App Import Settings" Margin="0,0,0,10" TextDecorations="Underline" TextOptions.TextFormattingMode="Display" FontSize="16"/>
+        <!--Moonlight Path-->
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Width="300" Text="Enter the path to the Moonlight.exe:"/>
+            <TextBox Text="{Binding Settings.MoonlightPath}" Style="{StaticResource SettingsTextBoxStyle}"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <!--Host-->
+        <StackPanel Orientation="Horizontal">
             <TextBlock Width="300" TextWrapping="Wrap" Text="Enter the host address of the Sunshine server withouth http or port (e.g. 192.168.1.69 or localhost):"/>
-            <TextBox Width="270" Text="{Binding Settings.SunshineHost}"/>
+            <TextBox Text="{Binding Settings.SunshineHost}" Style="{StaticResource SettingsTextBoxStyle}"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock Text="Select your server type:"/>
+        <!--Server type-->
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Width="300" Text="Select your server type:"/>
             <ComboBox SelectedItem="{Binding Settings.ServerType}" ItemsSource="{Binding Source={StaticResource ServerTypeValues}}" />
         </StackPanel>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding Settings.IsSunshine}">
-            <TextBlock Text="Enter the username for the Sunshine server:"/>
-            <TextBox Width="340" Text="{Binding Settings.SunshineUsername}"/>
+        <!--Username (Sunshine)-->
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsSunshine}">
+            <TextBlock Width="300" Text="Enter the username for the Sunshine server:"/>
+            <TextBox Text="{Binding Settings.SunshineUsername}" Style="{StaticResource SettingsTextBoxStyle}"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding Settings.IsSunshine}">
+        <!--Password (Sunshine)-->
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsSunshine}">
             <TextBlock Width="300" TextWrapping="Wrap" Text="Enter the password for the Sunshine server (encrypted using your Windows Account):"/>
-            <TextBox Width="270" Text="{Binding Settings.SunshinePassword}"/>
+            <TextBox Text="{Binding Settings.SunshinePassword}" Style="{StaticResource SettingsTextBoxStyle}"/>
         </StackPanel>
         <Separator />
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding Settings.IsVibepollo}">
+        <!--API (Vibepollo)-->
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsVibepollo}">
             <TextBlock Width="300" TextWrapping="Wrap" Text="Enter the API Key for the Vibepollo server (encrypted using your Windows Account):"/>
-            <TextBox Width="270" Text="{Binding Settings.VibepolloApiKey}"/>
+            <TextBox Text="{Binding Settings.VibepolloApiKey}" Style="{StaticResource SettingsTextBoxStyle}"/>
         </StackPanel>
         <Separator />
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <!--Skip Certificate-->
+        <StackPanel Orientation="Horizontal">
             <CheckBox IsChecked="{Binding Settings.SkipCertificateValidation}"/>
             <TextBlock Text="Skip certificate validation? You should check this if the Sunshine server does not have a valid certificate."/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <!--Ping Server-->
+        <StackPanel Orientation="Horizontal">
             <CheckBox IsChecked="{Binding Settings.PingHost}"/>
             <TextBlock Text="Ping the Sunshine server before calling Api?"/>
         </StackPanel>
