@@ -6,7 +6,9 @@ Packages:
     PackageUrl: https://github.com/SolemnDucc/MoonlightAppImport/releases/download/1.2/MoonlightAppImport_60ea0079-bf4b-417c-a1f3-d5470ec5e96b_1_1.pext
     Changelog:
       - Note for updating, there were breaking changes and you will need to configure the settings page again!
-      - Added support for Vibepollo
+      - Added support for Vibepollo by @lhmngwy
+      - Removed dummy manifest data so that Playnite can grab them automatically
+      - Restructured the settings page
   - Version: 1.1
     RequiredApiVersion: 6.13.0
     ReleaseDate: 2025-10-20
