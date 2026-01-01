@@ -113,13 +113,13 @@ namespace MoonlightAppImport.Http
                 throw new ArgumentNullException(nameof(_settings.SunshineHost));
 
             if (string.IsNullOrWhiteSpace(_settings.SunshineUsername))
-                throw new ArgumentNullException(nameof(_settings.SunshineHost));
+                throw new ArgumentNullException(nameof(_settings.SunshineUsername));
 
             if (string.IsNullOrWhiteSpace(_settings.SunshinePassword))
-                throw new ArgumentNullException(nameof(_settings.SunshineHost));
+                throw new ArgumentNullException(nameof(_settings.SunshinePassword));
 
             if (string.IsNullOrWhiteSpace(_settings.MoonlightPath))
-                throw new ArgumentNullException(nameof(_settings.SunshineHost));
+                throw new ArgumentNullException(nameof(_settings.MoonlightPath));
 
             bool result = IPValidator.ValidateAndResolve(_settings.SunshineHost);
             if (!result)

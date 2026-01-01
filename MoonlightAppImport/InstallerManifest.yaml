@@ -1,5 +1,15 @@
 AddonId:  MoonlightAppImport_60ea0079-bf4b-417c-a1f3-d5470ec5e96b
 Packages:
+    - Version: 1.2
+    RequiredApiVersion: 6.14.0
+    ReleaseDate: 2026-01-01
+    PackageUrl: https://github.com/SolemnDucc/MoonlightAppImport/releases/download/1.2/MoonlightAppImport_60ea0079-bf4b-417c-a1f3-d5470ec5e96b_1_1.pext
+    Changelog:
+      - Note for updating, there were breaking changes and you will need to configure the settings page again!
+      - Added support for Vibepollo by @lhmngwy
+      - Made dummy metadata optional so that Playnite can grab them automatically if you want to
+      - Restructured the settings page
+      - Added a checkbox to disable the whole addon
   - Version: 1.1
     RequiredApiVersion: 6.13.0
     ReleaseDate: 2025-10-20

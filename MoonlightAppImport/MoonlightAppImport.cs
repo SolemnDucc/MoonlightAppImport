@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -20,7 +21,7 @@ namespace MoonlightAppImport
         #region Fields
         private static readonly ILogger _logger = LogManager.GetLogger();
         private static readonly string _iconPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "icon.png");
-        private MoonlightAppImportSettingsViewModel settings { get; set; }
+        private readonly MoonlightAppImportSettingsViewModel _settings;
         #endregion
 
         #region Properties
@@ -32,7 +33,7 @@ namespace MoonlightAppImport
         #region Constructors
         public MoonlightAppImport(IPlayniteAPI api) : base(api)
         {
-            settings = new MoonlightAppImportSettingsViewModel(this);
+            _settings = new MoonlightAppImportSettingsViewModel(this);
             Properties = new LibraryPluginProperties
             {
                 HasSettings = true
@@ -44,34 +45,38 @@ namespace MoonlightAppImport
         #region Methods
         public override IEnumerable<GameMetadata> GetGames(LibraryGetGamesArgs args)
         {
+            // If the Addon is not enabled, return empty list.
+            if (!_settings.Settings.IsEnabled)
+                return new List<GameMetadata>();
+
             _logger.Info("Getting Games from Moonlight...");
             IHttpClient httpClient = null;
             try
             {
-                // Get Games from Sunshine server
-                if (!string.IsNullOrEmpty(settings.Settings.VibepolloApiKey))
+                // Select the server type
+                switch (_settings.Settings.ServerType)
                 {
-                    _logger.Info("Vibepollo server was chosen.");
-                    httpClient = new VibepolloHttpClient(settings.Settings);
-                }
-                else if (settings.Settings.IsApollo)
-                {
-                    _logger.Info("Apollo server was chosen.");
-                    httpClient = new ApolloHttpClient(settings.Settings);
-                }
-                else
-                {
-                    _logger.Info("Sunshine server was chosen.");
-                    httpClient = new SunshineHttpClient(settings.Settings);
+                    case ServerType.Sunshine:
+                        _logger.Info("Sunshine server was chosen.");
+                        httpClient = new SunshineHttpClient(_settings.Settings);
+                        break;
+                    case ServerType.Apollo:
+                        _logger.Info("Apollo server was chosen.");
+                        httpClient = new ApolloHttpClient(_settings.Settings);
+                        break;
+                    case ServerType.Vibepollo:
+                        _logger.Info("Vibepollo server was chosen.");
+                        httpClient = new VibepolloHttpClient(_settings.Settings);
+                        break;
                 }
 
-                if (settings.Settings.PingHost)
+                if (_settings.Settings.PingHost)
                 {
                     bool online = httpClient.IsServerOnlineAsync().GetAwaiter().GetResult();
                     if (!online)
                     {
-                        _logger.Error($"Tried to ping the Sunshine server {settings.Settings.SunshineHost} but failed. The Sunshine server is not online or the host address is wrong!");
-                        throw new TimeoutException($"Tried to ping the Sunshine server {settings.Settings.SunshineHost} but failed. The Sunshine server is not online or the host address is wrong!");
+                        _logger.Error($"Tried to ping the Sunshine server \"{_settings.Settings.SunshineHost}\" but failed. The Sunshine server is not online or the host address is wrong!");
+                        throw new TimeoutException($"Tried to ping the Sunshine server \"{_settings.Settings.SunshineHost}\" but failed. The Sunshine server is not online or the host address is wrong!");
                     }
                 }
 
@@ -83,7 +88,7 @@ namespace MoonlightAppImport
 
                 foreach (App app in response.apps)
                 {
-                    metadata.Add(new GameMetadata()
+                    var gameMetadata = new GameMetadata()
                     {
                         Name = app.name,
                         GameId = app.uuid ?? $"{hostname}-{app.name}",
@@ -95,14 +100,23 @@ namespace MoonlightAppImport
                                     Name = app.name,
                                     IsPlayAction = true,
                                     Type = GameActionType.File,
-                                    Path = settings.Settings.MoonlightPath,
+                                    Path = _settings.Settings.MoonlightPath,
                                     Arguments = $"stream \"{hostname}\" \"{app.name}\""
                                 }
                             },
                         InstallDirectory = $"Sunshine server {hostname}",
                         IsInstalled = true,
-                        Icon = new MetadataFile(settings.Settings.MoonlightPath)
-                    });
+                    };
+
+                    // Add metadata if configured
+                    if (_settings.Settings.AddMetadata)
+                    {
+                        gameMetadata.Icon = new MetadataFile(_settings.Settings.MoonlightPath);
+                        gameMetadata.Description = $"This is an App that was automatically added by the plugin \"Moonlight App Import\" at {DateTime.Now}. It is installed on the {_settings.Settings.ServerType} server \"{hostname}\".";
+                        gameMetadata.BackgroundImage = new MetadataFile(@"https://cdn2.steamgriddb.com/grid/6ca7ef116c25226eb528620dcecbadce.png");
+                    }
+
+                    metadata.Add(gameMetadata);
                     _logger.Info($"Added App \"{app.name}\" from Sunshine server \"{hostname}\" to the import list.");
                 }
 
@@ -121,7 +135,7 @@ namespace MoonlightAppImport
 
         public override ISettings GetSettings(bool firstRunSettings)
         {
-            return settings;
+            return _settings;
         }
 
         public override UserControl GetSettingsView(bool firstRunSettings)
