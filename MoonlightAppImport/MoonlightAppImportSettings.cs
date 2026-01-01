@@ -29,12 +29,71 @@ namespace MoonlightAppImport
         private SecureString _sunshinePassword = new SecureString();
         private string _encryptedSunshinePassword = string.Empty;
 
+        private SecureString _vibepolloApiKey = new SecureString();
+        private string _encryptedVibepolloApiKey = string.Empty;
+
         public string MoonlightPath { get => _moonlightPath; set => SetValue(ref _moonlightPath, value); }
         public string SunshineHost { get => _sunshineHost; set => SetValue(ref _sunshineHost, value); }
         public string SunshineUsername { get => _sunshineUsername; set => SetValue(ref _sunshineUsername, value); }
         public bool IsApollo { get => _isApollo; set => SetValue(ref _isApollo, value); }
         public bool SkipCertificateValidation { get => _skipCertificateValidation; set => SetValue(ref _skipCertificateValidation, value); }
         public bool PingHost { get => _pingHost; set => SetValue(ref _pingHost, value); }
+
+        [DontSerialize]
+        public string VibepolloApiKey
+        {
+            get => SecureStringToString(_vibepolloApiKey);
+            set
+            {
+                // Update the SecureString
+                var secureString = new SecureString();
+                if (!string.IsNullOrEmpty(value))
+                {
+                    foreach (char c in value)
+                    {
+                        secureString.AppendChar(c);
+                    }
+                }
+                secureString.MakeReadOnly();
+
+                // Store it securely in memory
+                _vibepolloApiKey = secureString;
+
+                // Update the encrypted version for serialization
+                _encryptedVibepolloApiKey = EncryptPassword(value);
+
+                // Notify property changes
+                OnPropertyChanged(nameof(VibepolloApiKey));
+            }
+        }
+
+        // Property for serialized, encrypted password
+        public string EncryptedVibepolloApiKey
+        {
+            get => _encryptedVibepolloApiKey;
+            set
+            {
+                if (_encryptedVibepolloApiKey != value)
+                {
+                    _encryptedVibepolloApiKey = value;
+
+                    // When loaded from serialization, restore the SecureString
+                    string decrypted = DecryptPassword(value);
+                    var secureString = new SecureString();
+                    if (!string.IsNullOrEmpty(decrypted))
+                    {
+                        foreach (char c in decrypted)
+                        {
+                            secureString.AppendChar(c);
+                        }
+                    }
+                    secureString.MakeReadOnly();
+                    _vibepolloApiKey = secureString;
+
+                    OnPropertyChanged(nameof(EncryptedVibepolloApiKey));
+                }
+            }
+        }
 
         [DontSerialize]
         public string SunshinePassword
@@ -194,6 +253,7 @@ namespace MoonlightAppImport
             // This method should save settings made to Option1 and Option2.
             Settings.MoonlightPath = Settings.MoonlightPath.Trim();
             Settings.SunshinePassword = Settings.SunshinePassword.Trim();
+            Settings.VibepolloApiKey = Settings.VibepolloApiKey.Trim();
             Settings.SunshineUsername = Settings.SunshineUsername.Trim();
             Settings.SunshineHost = Settings.SunshineHost.Trim();
 

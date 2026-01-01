@@ -107,7 +107,7 @@ namespace MoonlightAppImport.Http
             return JsonConvert.DeserializeObject<MoonlightApps>(json);
         }
 
-        private void CheckSettings()
+        protected virtual void CheckSettings()
         {
             if (string.IsNullOrWhiteSpace(_settings.SunshineHost))
                 throw new ArgumentNullException(nameof(_settings.SunshineHost));

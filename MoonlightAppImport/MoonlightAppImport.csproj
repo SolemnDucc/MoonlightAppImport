@@ -8,10 +8,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MoonlightAppImport</RootNamespace>
     <AssemblyName>MoonlightAppImport</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <ProjectGuid>{2351B5C1-6E28-4B79-A1D9-90FDA53B5417}</ProjectGuid>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -58,6 +59,7 @@
     <Compile Include="Http\ApolloHttpClient.cs" />
     <Compile Include="Http\IHttpClient.cs" />
     <Compile Include="Http\SunshineHttpClient.cs" />
+    <Compile Include="Http\VibepolloHttpClient.cs" />
     <Compile Include="Models\IPValidator.cs" />
     <Compile Include="Models\MoonlightApps.cs" />
     <Compile Include="MoonlightAppImport.cs" />

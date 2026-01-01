@@ -49,7 +49,12 @@ namespace MoonlightAppImport
             try
             {
                 // Get Games from Sunshine server
-                if (settings.Settings.IsApollo)
+                if (!string.IsNullOrEmpty(settings.Settings.VibepolloApiKey))
+                {
+                    _logger.Info("Vibepollo server was chosen.");
+                    httpClient = new VibepolloHttpClient(settings.Settings);
+                }
+                else if (settings.Settings.IsApollo)
                 {
                     _logger.Info("Apollo server was chosen.");
                     httpClient = new ApolloHttpClient(settings.Settings);
@@ -95,13 +100,8 @@ namespace MoonlightAppImport
                                 }
                             },
                         InstallDirectory = $"Sunshine server {hostname}",
-                        Description =
-                            $"This is an App that was automatically added by the plugin \"Moonlight App Import\" at {DateTime.Now}. It is installed on the Sunshine server \"{hostname}\".",
                         IsInstalled = true,
-                        Icon = new MetadataFile(settings.Settings.MoonlightPath),
-                        BackgroundImage =
-                            new MetadataFile(
-                                @"https://cdn2.steamgriddb.com/grid/6ca7ef116c25226eb528620dcecbadce.png")
+                        Icon = new MetadataFile(settings.Settings.MoonlightPath)
                     });
                     _logger.Info($"Added App \"{app.name}\" from Sunshine server \"{hostname}\" to the import list.");
                 }
