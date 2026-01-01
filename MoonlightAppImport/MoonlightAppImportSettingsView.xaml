@@ -88,5 +88,10 @@
             <CheckBox IsChecked="{Binding Settings.PingHost}"/>
             <TextBlock Text="Ping the Sunshine server before calling Api?"/>
         </StackPanel>
+        <!--Add Dummy Meta Data-->
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsEnabled}">
+            <CheckBox IsChecked="{Binding Settings.AddMetadata}"/>
+            <TextBlock Text="Add dummy Metadata to imported Games? Playnite will not automatically add the Metadata then!"/>
+        </StackPanel>
     </StackPanel>
 </UserControl>

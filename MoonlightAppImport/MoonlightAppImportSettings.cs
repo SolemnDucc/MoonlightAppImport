@@ -33,6 +33,7 @@ namespace MoonlightAppImport
         private bool _skipCertificateValidation = true;
         private bool _pingHost = false;
         private bool _isEnabled = false;
+        private bool _addMetadata = false;
 
         private SecureString _sunshinePassword = new SecureString();
         private string _encryptedSunshinePassword = string.Empty;
@@ -49,6 +50,7 @@ namespace MoonlightAppImport
         public bool SkipCertificateValidation { get => _skipCertificateValidation; set => SetValue(ref _skipCertificateValidation, value); }
         public bool PingHost { get => _pingHost; set => SetValue(ref _pingHost, value); }
         public bool IsEnabled { get => _isEnabled; set => SetValue(ref _isEnabled, value, nameof(IsEnabled), nameof(IsSunshine), nameof(IsVibepollo)); }
+        public bool AddMetadata { get => _addMetadata; set => SetValue(ref _addMetadata, value); }
 
         [DontSerialize]
         public string VibepolloApiKey

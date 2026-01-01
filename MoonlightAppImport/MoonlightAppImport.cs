@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -87,7 +88,7 @@ namespace MoonlightAppImport
 
                 foreach (App app in response.apps)
                 {
-                    metadata.Add(new GameMetadata()
+                    var gameMetadata = new GameMetadata()
                     {
                         Name = app.name,
                         GameId = app.uuid ?? $"{hostname}-{app.name}",
@@ -105,8 +106,17 @@ namespace MoonlightAppImport
                             },
                         InstallDirectory = $"Sunshine server {hostname}",
                         IsInstalled = true,
-                        Icon = new MetadataFile(_settings.Settings.MoonlightPath)
-                    });
+                    };
+
+                    // Add metadata if configured
+                    if (_settings.Settings.AddMetadata)
+                    {
+                        gameMetadata.Icon = new MetadataFile(_settings.Settings.MoonlightPath);
+                        gameMetadata.Description = $"This is an App that was automatically added by the plugin \"Moonlight App Import\" at {DateTime.Now}. It is installed on the {_settings.Settings.ServerType} server \"{hostname}\".";
+                        gameMetadata.BackgroundImage = new MetadataFile(@"https://cdn2.steamgriddb.com/grid/6ca7ef116c25226eb528620dcecbadce.png");
+                    }
+
+                    metadata.Add(gameMetadata);
                     _logger.Info($"Added App \"{app.name}\" from Sunshine server \"{hostname}\" to the import list.");
                 }
 
