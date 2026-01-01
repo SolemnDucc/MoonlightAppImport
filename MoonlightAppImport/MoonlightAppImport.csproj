@@ -59,6 +59,7 @@
     <Compile Include="Http\ApolloHttpClient.cs" />
     <Compile Include="Http\IHttpClient.cs" />
     <Compile Include="Http\SunshineHttpClient.cs" />
+    <Compile Include="Http\VibepolloHttpClient.cs" />
     <Compile Include="Models\IPValidator.cs" />
     <Compile Include="Models\MoonlightApps.cs" />
     <Compile Include="MoonlightAppImport.cs" />

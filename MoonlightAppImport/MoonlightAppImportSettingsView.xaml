@@ -22,6 +22,8 @@
         <TextBox Text="{Binding Settings.SunshineUsername}"/>
         <TextBlock Text="Enter the password for the Sunshine server (encrypted using your Windows Account):"/>
         <TextBox Text="{Binding Settings.SunshinePassword}"/>
+        <TextBlock Text="Enter the API Key for the Vibepollo server (encrypted using your Windows Account):"/>
+        <TextBox Text="{Binding Settings.VibepolloApiKey}"/>
         <TextBlock Text="Is the Sunshine server actually an Apollo server?"/>
         <CheckBox IsChecked="{Binding Settings.IsApollo}"/>
         <TextBlock Text="Skip certificate validation? You should check this if the Sunshine server does not have a valid certificate."/>
