@@ -278,12 +278,12 @@ namespace MoonlightAppImport
 
             // Check if the moonlight path is valid
             Settings.MoonlightPath = Settings.MoonlightPath.Trim().Trim('"');
-            result = File.Exists(Settings.MoonlightPath) && Path.GetFileName(Settings.MoonlightPath).Equals("Moonlight.exe", StringComparison.OrdinalIgnoreCase);
+            bool result = File.Exists(Settings.MoonlightPath) && Path.GetFileName(Settings.MoonlightPath).Equals("Moonlight.exe", StringComparison.OrdinalIgnoreCase);
             if (!result)
                 errors.Add("- The Moonlight path was invalid! Must point to a \"Moonlight.exe\".");
 
             // Check if the sunshine host is valid
-            bool result = IPValidator.ValidateAndResolve(Settings.SunshineHost);
+            result = IPValidator.ValidateAndResolve(Settings.SunshineHost);
             if (!result)
                 errors.Add("- The Sunshine host address was invalid! Could be \"192.168.1.69\" or \"localhost\".");
 
@@ -291,16 +291,16 @@ namespace MoonlightAppImport
             if (settings.IsSunshine)
             {
                 if (string.IsNullOrEmpty(Settings.SunshineUsername))
-                    errors.Add($"- When you choose \"Sunshine\" or \"Apollo\" as server then you need to provide a username.")
+                    errors.Add($"- When you choose \"Sunshine\" or \"Apollo\" as server then you need to provide a username.");
 
-                if(string.IsNullOrEmpty(Settings.SunshinePassword))
-                    errors.Add($"- When you choose \"Sunshine\" or \"Apollo\" as server then you need to provide a password.")
+                if (string.IsNullOrEmpty(Settings.SunshinePassword))
+                    errors.Add($"- When you choose \"Sunshine\" or \"Apollo\" as server then you need to provide a password.");
             }
             // Check if there is an API key if it is vibepollo
             else if (settings.IsVibepollo)
             {
                 if (string.IsNullOrEmpty(Settings.VibepolloApiKey))
-                    errors.Add($"- When you choose \"Vibepollo\" as server then you need to provide an API Key.")
+                    errors.Add($"- When you choose \"Vibepollo\" as server then you need to provide an API Key.");
             }
             
             return errors.Count == 0;

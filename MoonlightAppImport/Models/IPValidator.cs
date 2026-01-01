@@ -33,7 +33,7 @@ namespace MoonlightAppImport.Models
                 }
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
