@@ -41,18 +41,23 @@
         </StackPanel.Resources>
         <!--Header-->
         <TextBlock Text="Moonlight App Import Settings" Margin="0,0,0,10" TextDecorations="Underline" TextOptions.TextFormattingMode="Display" FontSize="16"/>
-        <!--Moonlight Path-->
+        <!--Enable the Addonr-->
         <StackPanel Orientation="Horizontal">
+            <CheckBox IsChecked="{Binding Settings.IsEnabled}"/>
+            <TextBlock Text="Import Games from Moonlight?"/>
+        </StackPanel>
+        <!--Moonlight Path-->
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsEnabled}">
             <TextBlock Width="300" Text="Enter the path to the Moonlight.exe:"/>
             <TextBox Text="{Binding Settings.MoonlightPath}" Style="{StaticResource SettingsTextBoxStyle}"/>
         </StackPanel>
         <!--Host-->
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsEnabled}">
             <TextBlock Width="300" TextWrapping="Wrap" Text="Enter the host address of the Sunshine server withouth http or port (e.g. 192.168.1.69 or localhost):"/>
             <TextBox Text="{Binding Settings.SunshineHost}" Style="{StaticResource SettingsTextBoxStyle}"/>
         </StackPanel>
         <!--Server type-->
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsEnabled}">
             <TextBlock Width="300" Text="Select your server type:"/>
             <ComboBox SelectedItem="{Binding Settings.ServerType}" ItemsSource="{Binding Source={StaticResource ServerTypeValues}}" />
         </StackPanel>
@@ -74,12 +79,12 @@
         </StackPanel>
         <Separator />
         <!--Skip Certificate-->
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsEnabled}">
             <CheckBox IsChecked="{Binding Settings.SkipCertificateValidation}"/>
             <TextBlock Text="Skip certificate validation? You should check this if the Sunshine server does not have a valid certificate."/>
         </StackPanel>
         <!--Ping Server-->
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsEnabled}">
             <CheckBox IsChecked="{Binding Settings.PingHost}"/>
             <TextBlock Text="Ping the Sunshine server before calling Api?"/>
         </StackPanel>

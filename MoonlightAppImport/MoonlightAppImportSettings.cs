@@ -32,6 +32,7 @@ namespace MoonlightAppImport
         private ServerType _serverType = ServerType.Sunshine;
         private bool _skipCertificateValidation = true;
         private bool _pingHost = false;
+        private bool _isEnabled = false;
 
         private SecureString _sunshinePassword = new SecureString();
         private string _encryptedSunshinePassword = string.Empty;
@@ -43,10 +44,11 @@ namespace MoonlightAppImport
         public string SunshineHost { get => _sunshineHost; set => SetValue(ref _sunshineHost, value); }
         public string SunshineUsername { get => _sunshineUsername; set => SetValue(ref _sunshineUsername, value); }
         public ServerType ServerType { get => _serverType; set => SetValue(ref _serverType, value, nameof(ServerType), nameof(IsVibepollo), nameof(IsSunshine)); }
-        public bool IsSunshine => ServerType == ServerType.Sunshine || ServerType == ServerType.Apollo;
-        public bool IsVibepollo => ServerType == ServerType.Vibepollo;
+        public bool IsSunshine => (ServerType == ServerType.Sunshine || ServerType == ServerType.Apollo) && IsEnabled;
+        public bool IsVibepollo => ServerType == ServerType.Vibepollo && IsEnabled;
         public bool SkipCertificateValidation { get => _skipCertificateValidation; set => SetValue(ref _skipCertificateValidation, value); }
         public bool PingHost { get => _pingHost; set => SetValue(ref _pingHost, value); }
+        public bool IsEnabled { get => _isEnabled; set => SetValue(ref _isEnabled, value, nameof(IsEnabled), nameof(IsSunshine), nameof(IsVibepollo)); }
 
         [DontSerialize]
         public string VibepolloApiKey
@@ -275,6 +277,10 @@ namespace MoonlightAppImport
             // Executed before EndEdit is called and EndEdit is not called if false is returned.
             // List of errors is presented to user if verification fails.
             errors = new List<string>();
+
+            // If the Addon is not enabled, skip the validation of the settings
+            if (!Settings.IsEnabled)
+                return true;
 
             // Check if the moonlight path is valid
             Settings.MoonlightPath = Settings.MoonlightPath.Trim().Trim('"');

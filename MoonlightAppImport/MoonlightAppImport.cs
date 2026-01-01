@@ -20,7 +20,7 @@ namespace MoonlightAppImport
         #region Fields
         private static readonly ILogger _logger = LogManager.GetLogger();
         private static readonly string _iconPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "icon.png");
-        private MoonlightAppImportSettingsViewModel settings { get; set; }
+        private readonly MoonlightAppImportSettingsViewModel _settings;
         #endregion
 
         #region Properties
@@ -32,7 +32,7 @@ namespace MoonlightAppImport
         #region Constructors
         public MoonlightAppImport(IPlayniteAPI api) : base(api)
         {
-            settings = new MoonlightAppImportSettingsViewModel(this);
+            _settings = new MoonlightAppImportSettingsViewModel(this);
             Properties = new LibraryPluginProperties
             {
                 HasSettings = true
@@ -44,34 +44,38 @@ namespace MoonlightAppImport
         #region Methods
         public override IEnumerable<GameMetadata> GetGames(LibraryGetGamesArgs args)
         {
+            // If the Addon is not enabled, return empty list.
+            if (!_settings.Settings.IsEnabled)
+                return new List<GameMetadata>();
+
             _logger.Info("Getting Games from Moonlight...");
             IHttpClient httpClient = null;
             try
             {
                 // Select the server type
-                switch (settings.Settings.ServerType)
+                switch (_settings.Settings.ServerType)
                 {
                     case ServerType.Sunshine:
                         _logger.Info("Sunshine server was chosen.");
-                        httpClient = new SunshineHttpClient(settings.Settings);
+                        httpClient = new SunshineHttpClient(_settings.Settings);
                         break;
                     case ServerType.Apollo:
                         _logger.Info("Apollo server was chosen.");
-                        httpClient = new ApolloHttpClient(settings.Settings);
+                        httpClient = new ApolloHttpClient(_settings.Settings);
                         break;
                     case ServerType.Vibepollo:
                         _logger.Info("Vibepollo server was chosen.");
-                        httpClient = new VibepolloHttpClient(settings.Settings);
+                        httpClient = new VibepolloHttpClient(_settings.Settings);
                         break;
                 }
 
-                if (settings.Settings.PingHost)
+                if (_settings.Settings.PingHost)
                 {
                     bool online = httpClient.IsServerOnlineAsync().GetAwaiter().GetResult();
                     if (!online)
                     {
-                        _logger.Error($"Tried to ping the Sunshine server \"{settings.Settings.SunshineHost}\" but failed. The Sunshine server is not online or the host address is wrong!");
-                        throw new TimeoutException($"Tried to ping the Sunshine server \"{settings.Settings.SunshineHost}\" but failed. The Sunshine server is not online or the host address is wrong!");
+                        _logger.Error($"Tried to ping the Sunshine server \"{_settings.Settings.SunshineHost}\" but failed. The Sunshine server is not online or the host address is wrong!");
+                        throw new TimeoutException($"Tried to ping the Sunshine server \"{_settings.Settings.SunshineHost}\" but failed. The Sunshine server is not online or the host address is wrong!");
                     }
                 }
 
@@ -95,13 +99,13 @@ namespace MoonlightAppImport
                                     Name = app.name,
                                     IsPlayAction = true,
                                     Type = GameActionType.File,
-                                    Path = settings.Settings.MoonlightPath,
+                                    Path = _settings.Settings.MoonlightPath,
                                     Arguments = $"stream \"{hostname}\" \"{app.name}\""
                                 }
                             },
                         InstallDirectory = $"Sunshine server {hostname}",
                         IsInstalled = true,
-                        Icon = new MetadataFile(settings.Settings.MoonlightPath)
+                        Icon = new MetadataFile(_settings.Settings.MoonlightPath)
                     });
                     _logger.Info($"Added App \"{app.name}\" from Sunshine server \"{hostname}\" to the import list.");
                 }
@@ -121,7 +125,7 @@ namespace MoonlightAppImport
 
         public override ISettings GetSettings(bool firstRunSettings)
         {
-            return settings;
+            return _settings;
         }
 
         public override UserControl GetSettingsView(bool firstRunSettings)
