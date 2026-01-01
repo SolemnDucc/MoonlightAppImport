@@ -17,14 +17,21 @@ using System.Threading.Tasks;
 
 namespace MoonlightAppImport
 {
+    public enum ServerType
+    {
+        Sunshine,
+        Apollo,
+        Vibepollo
+    }
+
     public class MoonlightAppImportSettings : ObservableObject
     {
         private string _moonlightPath = string.Empty;
         private string _sunshineHost = string.Empty;
         private string _sunshineUsername = string.Empty;
-        private bool _isApollo = false;
-        private bool _skipCertificateValidation = false;
-        private bool _pingHost = true;
+        private ServerType _serverType = ServerType.Sunshine;
+        private bool _skipCertificateValidation = true;
+        private bool _pingHost = false;
 
         private SecureString _sunshinePassword = new SecureString();
         private string _encryptedSunshinePassword = string.Empty;
@@ -35,7 +42,9 @@ namespace MoonlightAppImport
         public string MoonlightPath { get => _moonlightPath; set => SetValue(ref _moonlightPath, value); }
         public string SunshineHost { get => _sunshineHost; set => SetValue(ref _sunshineHost, value); }
         public string SunshineUsername { get => _sunshineUsername; set => SetValue(ref _sunshineUsername, value); }
-        public bool IsApollo { get => _isApollo; set => SetValue(ref _isApollo, value); }
+        public ServerType ServerType { get => _serverType; set => SetValue(ref _serverType, value, nameof(ServerType), nameof(IsVibepollo), nameof(IsSunshine)); }
+        public bool IsSunshine => ServerType == ServerType.Sunshine || ServerType == ServerType.Apollo;
+        public bool IsVibepollo => ServerType == ServerType.Vibepollo;
         public bool SkipCertificateValidation { get => _skipCertificateValidation; set => SetValue(ref _skipCertificateValidation, value); }
         public bool PingHost { get => _pingHost; set => SetValue(ref _pingHost, value); }
 
@@ -267,17 +276,33 @@ namespace MoonlightAppImport
             // List of errors is presented to user if verification fails.
             errors = new List<string>();
 
-            // Check if the sunshine host is valid
-            bool result = IPValidator.ValidateAndResolve(Settings.SunshineHost);
-            if (!result)
-                errors.Add("- The Sunshine host address was invalid! Could be \"192.168.1.69\" or \"localhost\".");
-
             // Check if the moonlight path is valid
             Settings.MoonlightPath = Settings.MoonlightPath.Trim().Trim('"');
             result = File.Exists(Settings.MoonlightPath) && Path.GetFileName(Settings.MoonlightPath).Equals("Moonlight.exe", StringComparison.OrdinalIgnoreCase);
             if (!result)
                 errors.Add("- The Moonlight path was invalid! Must point to a \"Moonlight.exe\".");
 
+            // Check if the sunshine host is valid
+            bool result = IPValidator.ValidateAndResolve(Settings.SunshineHost);
+            if (!result)
+                errors.Add("- The Sunshine host address was invalid! Could be \"192.168.1.69\" or \"localhost\".");
+
+            // Check if there is a username/password for the server if it is sunshine or apollo
+            if (settings.IsSunshine)
+            {
+                if (string.IsNullOrEmpty(Settings.SunshineUsername))
+                    errors.Add($"- When you choose \"Sunshine\" or \"Apollo\" as server then you need to provide a username.")
+
+                if(string.IsNullOrEmpty(Settings.SunshinePassword))
+                    errors.Add($"- When you choose \"Sunshine\" or \"Apollo\" as server then you need to provide a password.")
+            }
+            // Check if there is an API key if it is vibepollo
+            else if (settings.IsVibepollo)
+            {
+                if (string.IsNullOrEmpty(Settings.VibepolloApiKey))
+                    errors.Add($"- When you choose \"Vibepollo\" as server then you need to provide an API Key.")
+            }
+            
             return errors.Count == 0;
         }
     }

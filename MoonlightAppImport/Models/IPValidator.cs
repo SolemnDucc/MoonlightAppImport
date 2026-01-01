@@ -12,6 +12,8 @@ namespace MoonlightAppImport.Models
     {
         public static bool ValidateAndResolve(string input)
         {
+            if(string.IsNullOrEmpty(input)) return false;
+
             // Try to parse as an IPv4 address
             if (IPAddress.TryParse(input, out IPAddress address) && address.AddressFamily == AddressFamily.InterNetwork)
             {

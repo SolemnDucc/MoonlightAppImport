@@ -48,21 +48,21 @@ namespace MoonlightAppImport
             IHttpClient httpClient = null;
             try
             {
-                // Get Games from Sunshine server
-                if (!string.IsNullOrEmpty(settings.Settings.VibepolloApiKey))
+                // Select the server type
+                switch (settings.Settings.ServerType)
                 {
-                    _logger.Info("Vibepollo server was chosen.");
-                    httpClient = new VibepolloHttpClient(settings.Settings);
-                }
-                else if (settings.Settings.IsApollo)
-                {
-                    _logger.Info("Apollo server was chosen.");
-                    httpClient = new ApolloHttpClient(settings.Settings);
-                }
-                else
-                {
-                    _logger.Info("Sunshine server was chosen.");
-                    httpClient = new SunshineHttpClient(settings.Settings);
+                    case ServerType.Sunshine:
+                        _logger.Info("Sunshine server was chosen.");
+                        httpClient = new SunshineHttpClient(settings.Settings);
+                        break;
+                    case ServerType.Apollo:
+                        _logger.Info("Apollo server was chosen.");
+                        httpClient = new ApolloHttpClient(settings.Settings);
+                        break;
+                    case ServerType.Vibepollo:
+                        _logger.Info("Vibepollo server was chosen.");
+                        httpClient = new VibepolloHttpClient(settings.Settings);
+                        break;
                 }
 
                 if (settings.Settings.PingHost)
