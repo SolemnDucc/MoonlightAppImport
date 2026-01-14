@@ -4,16 +4,10 @@ using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace MoonlightAppImport
 {
@@ -84,7 +78,7 @@ namespace MoonlightAppImport
         public string EncryptedVibepolloApiKey
         {
             get => _encryptedVibepolloApiKey;
-            set
+            private set
             {
                 if (_encryptedVibepolloApiKey != value)
                 {
@@ -140,7 +134,7 @@ namespace MoonlightAppImport
         public string EncryptedSunshinePassword
         {
             get => _encryptedSunshinePassword;
-            set
+            private set
             {
                 if (_encryptedSunshinePassword != value)
                 {
