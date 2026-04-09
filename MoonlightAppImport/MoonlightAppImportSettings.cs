@@ -18,16 +18,24 @@ namespace MoonlightAppImport
         Vibepollo
     }
 
+    public enum RemoveType
+    {
+        Uninstall,
+        Remove
+    }
+
     public class MoonlightAppImportSettings : ObservableObject
     {
         private string _moonlightPath = string.Empty;
         private string _sunshineHost = string.Empty;
         private string _sunshineUsername = string.Empty;
         private ServerType _serverType = ServerType.Sunshine;
+        private RemoveType _removeType = RemoveType.Uninstall;
         private bool _skipCertificateValidation = true;
         private bool _pingHost = false;
         private bool _isEnabled = false;
         private bool _addMetadata = false;
+        private bool _removeGames = false;
 
         private SecureString _sunshinePassword = new SecureString();
         private string _encryptedSunshinePassword = string.Empty;
@@ -39,12 +47,57 @@ namespace MoonlightAppImport
         public string SunshineHost { get => _sunshineHost; set => SetValue(ref _sunshineHost, value); }
         public string SunshineUsername { get => _sunshineUsername; set => SetValue(ref _sunshineUsername, value); }
         public ServerType ServerType { get => _serverType; set => SetValue(ref _serverType, value, nameof(ServerType), nameof(IsVibepollo), nameof(IsSunshine)); }
+        public RemoveType RemoveType { get => _removeType; set => SetValue(ref _removeType, value, nameof(RemoveType)); }
         public bool IsSunshine => (ServerType == ServerType.Sunshine || ServerType == ServerType.Apollo) && IsEnabled;
         public bool IsVibepollo => ServerType == ServerType.Vibepollo && IsEnabled;
         public bool SkipCertificateValidation { get => _skipCertificateValidation; set => SetValue(ref _skipCertificateValidation, value); }
         public bool PingHost { get => _pingHost; set => SetValue(ref _pingHost, value); }
-        public bool IsEnabled { get => _isEnabled; set => SetValue(ref _isEnabled, value, nameof(IsEnabled), nameof(IsSunshine), nameof(IsVibepollo)); }
+        public bool IsEnabled { get => _isEnabled; set => SetValue(ref _isEnabled, value, nameof(IsEnabled), nameof(IsSunshine), nameof(IsVibepollo), nameof(ShowRemoveTypePicker)); }
         public bool AddMetadata { get => _addMetadata; set => SetValue(ref _addMetadata, value); }
+        public bool RemoveGames { get => _removeGames; set => SetValue(ref _removeGames, value, nameof(ShowRemoveTypePicker)); }
+        public bool ShowRemoveTypePicker => RemoveGames && IsEnabled;
+
+        /// <summary>
+        /// Bindable SecureString for the Sunshine server password.
+        /// Used directly by the PasswordBox via the PasswordBoxHelper attached property.
+        /// Setting this property also updates the encrypted serialization backing field.
+        /// </summary>
+        [DontSerialize]
+        public SecureString SunshinePasswordSecure
+        {
+            get => _sunshinePassword;
+            set
+            {
+                _sunshinePassword = value ?? new SecureString();
+
+                // Keep the encrypted serialization field in sync
+                _encryptedSunshinePassword = EncryptPassword(SecureStringToString(_sunshinePassword));
+
+                OnPropertyChanged(nameof(SunshinePasswordSecure));
+                OnPropertyChanged(nameof(SunshinePassword));
+            }
+        }
+
+        /// <summary>
+        /// Bindable SecureString for the Vibepollo API key.
+        /// Used directly by the PasswordBox via the PasswordBoxHelper attached property.
+        /// Setting this property also updates the encrypted serialization backing field.
+        /// </summary>
+        [DontSerialize]
+        public SecureString VibepolloApiKeySecure
+        {
+            get => _vibepolloApiKey;
+            set
+            {
+                _vibepolloApiKey = value ?? new SecureString();
+
+                // Keep the encrypted serialization field in sync
+                _encryptedVibepolloApiKey = EncryptPassword(SecureStringToString(_vibepolloApiKey));
+
+                OnPropertyChanged(nameof(VibepolloApiKeySecure));
+                OnPropertyChanged(nameof(VibepolloApiKey));
+            }
+        }
 
         [DontSerialize]
         public string VibepolloApiKey
@@ -78,7 +131,7 @@ namespace MoonlightAppImport
         public string EncryptedVibepolloApiKey
         {
             get => _encryptedVibepolloApiKey;
-            private set
+            set
             {
                 if (_encryptedVibepolloApiKey != value)
                 {
@@ -98,6 +151,8 @@ namespace MoonlightAppImport
                     _vibepolloApiKey = secureString;
 
                     OnPropertyChanged(nameof(EncryptedVibepolloApiKey));
+                    OnPropertyChanged(nameof(VibepolloApiKeySecure));
+                    OnPropertyChanged(nameof(VibepolloApiKey));
                 }
             }
         }
@@ -134,7 +189,7 @@ namespace MoonlightAppImport
         public string EncryptedSunshinePassword
         {
             get => _encryptedSunshinePassword;
-            private set
+            set
             {
                 if (_encryptedSunshinePassword != value)
                 {
@@ -154,6 +209,8 @@ namespace MoonlightAppImport
                     _sunshinePassword = secureString;
 
                     OnPropertyChanged(nameof(EncryptedSunshinePassword));
+                    OnPropertyChanged(nameof(SunshinePasswordSecure));
+                    OnPropertyChanged(nameof(SunshinePassword));
                 }
             }
         }

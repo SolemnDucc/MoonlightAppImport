@@ -6,13 +6,20 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:my="clr-namespace:MoonlightAppImport"
              mc:Ignorable="d"
-             d:DesignHeight="400" d:DesignWidth="600">
+             d:DesignHeight="500" d:DesignWidth="700">
     <UserControl.Resources>
         <ObjectDataProvider x:Key="ServerTypeValues" 
                     MethodName="GetValues" 
                     ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="my:ServerType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="RemoveTypeValues" 
+            MethodName="GetValues" 
+            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="my:RemoveType"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <!-- Cache the theme styles first (prevents circular BasedOn references) -->
@@ -41,7 +48,7 @@
         </StackPanel.Resources>
         <!--Header-->
         <TextBlock Text="Moonlight App Import Settings" Margin="0,0,0,10" TextDecorations="Underline" TextOptions.TextFormattingMode="Display" FontSize="16"/>
-        <!--Enable the Addonr-->
+        <!--Enable the Addon-->
         <StackPanel Orientation="Horizontal">
             <CheckBox IsChecked="{Binding Settings.IsEnabled}"/>
             <TextBlock Text="Import Games from Moonlight?"/>
@@ -66,16 +73,94 @@
             <TextBlock Width="300" Text="Enter the username for the Sunshine server:"/>
             <TextBox Text="{Binding Settings.SunshineUsername}" Style="{StaticResource SettingsTextBoxStyle}"/>
         </StackPanel>
-        <!--Password (Sunshine)-->
+        <!-- Password (Sunshine) -->
         <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsSunshine}">
-            <TextBlock Width="300" TextWrapping="Wrap" Text="Enter the password for the Sunshine server (encrypted using your Windows Account):"/>
-            <TextBox Text="{Binding Settings.SunshinePassword}" Style="{StaticResource SettingsTextBoxStyle}"/>
+            <TextBlock Width="300" TextWrapping="Wrap"
+               Text="Enter the password for the Sunshine server (encrypted using your Windows Account):"/>
+
+            <!-- Use a Grid to overlay the PasswordBox and the clear-text TextBox -->
+            <Grid>
+                <!-- The PasswordBox for masked input -->
+                <PasswordBox Height="22" Width="400" HorizontalAlignment="Stretch"
+                     my:PasswordBoxHelper.SecurePassword="{Binding Settings.SunshinePasswordSecure}">
+                    <PasswordBox.Style>
+                        <Style TargetType="PasswordBox">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <!-- Hide the PasswordBox when the Show checkbox is checked -->
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=ChkShowSunshine}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </PasswordBox.Style>
+                </PasswordBox>
+
+                <!-- The TextBox for clear-text input, synchronizing on every keystroke -->
+                <TextBox Height="22" Width="400" HorizontalAlignment="Stretch"
+                 Text="{Binding Settings.SunshinePassword, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource SettingsTextBoxStyle}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <!-- Show the TextBox when the Show checkbox is checked -->
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=ChkShowSunshine}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+            </Grid>
+
+            <!-- The toggle button to switch between PasswordBox and TextBox -->
+            <CheckBox x:Name="ChkShowSunshine" Content="Show" Margin="10,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
+
         <Separator />
-        <!--API (Vibepollo)-->
+
+        <!-- API (Vibepollo) -->
         <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsVibepollo}">
-            <TextBlock Width="300" TextWrapping="Wrap" Text="Enter the API Key for the Vibepollo server (encrypted using your Windows Account):"/>
-            <TextBox Text="{Binding Settings.VibepolloApiKey}" Style="{StaticResource SettingsTextBoxStyle}"/>
+            <TextBlock Width="300" TextWrapping="Wrap"
+               Text="Enter the API Key for the Vibepollo server (encrypted using your Windows Account):"/>
+
+            <!-- Use a Grid to overlay the PasswordBox and the clear-text TextBox -->
+            <Grid>
+                <!-- The PasswordBox for masked input -->
+                <PasswordBox Height="22" Width="400" HorizontalAlignment="Stretch"
+                     my:PasswordBoxHelper.SecurePassword="{Binding Settings.VibepolloApiKeySecure}">
+                    <PasswordBox.Style>
+                        <Style TargetType="PasswordBox">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <!-- Hide the PasswordBox when the Show checkbox is checked -->
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=ChkShowVibepollo}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </PasswordBox.Style>
+                </PasswordBox>
+
+                <!-- The TextBox for clear-text input, synchronizing on every keystroke -->
+                <TextBox Height="22" Width="400" HorizontalAlignment="Stretch"
+                 Text="{Binding Settings.VibepolloApiKey, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource SettingsTextBoxStyle}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <!-- Show the TextBox when the Show checkbox is checked -->
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=ChkShowVibepollo}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+            </Grid>
+
+            <!-- The toggle button to switch between PasswordBox and TextBox -->
+            <CheckBox x:Name="ChkShowVibepollo" Content="Show" Margin="10,0,0,0" VerticalAlignment="Center"/>
         </StackPanel>
         <Separator />
         <!--Skip Certificate-->
@@ -92,6 +177,15 @@
         <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsEnabled}">
             <CheckBox IsChecked="{Binding Settings.AddMetadata}"/>
             <TextBlock Text="Add dummy Metadata to imported Games? Playnite will not automatically add the Metadata then!"/>
+        </StackPanel>
+        <!--Remove Games that are not in the Sunshine Server anymore?-->
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.IsEnabled}">
+            <CheckBox IsChecked="{Binding Settings.RemoveGames}"/>
+            <TextBlock Text="Should a game be removed from Playnite or marked as uninstalled if it no longer exists in the Sunshine server?"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" IsEnabled="{Binding Settings.ShowRemoveTypePicker}">
+            <TextBlock Width="100" Text="Remove mode:"/>
+            <ComboBox SelectedItem="{Binding Settings.RemoveType}" ItemsSource="{Binding Source={StaticResource RemoveTypeValues}}" />
         </StackPanel>
     </StackPanel>
 </UserControl>

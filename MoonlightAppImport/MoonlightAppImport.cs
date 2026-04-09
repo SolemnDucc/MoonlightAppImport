@@ -1,16 +1,21 @@
 ﻿using MoonlightAppImport.Http;
 using MoonlightAppImport.Models;
 using Playnite.SDK;
+using Playnite.SDK.Events;
 using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Controls;
 
 namespace MoonlightAppImport
 {
+    /// <summary>
+    /// Represents the main library plugin for importing Moonlight applications into Playnite.
+    /// </summary>
     public class MoonlightAppImport : LibraryPlugin
     {
         #region Fields
@@ -38,6 +43,16 @@ namespace MoonlightAppImport
         #endregion
 
         #region Methods
+        public override IEnumerable<InstallController> GetInstallActions(GetInstallActionsArgs args)
+        {
+            yield return new MyInstallController(args.Game);
+        }
+
+        public override IEnumerable<UninstallController> GetUninstallActions(GetUninstallActionsArgs args)
+        {
+            yield return new MyUninstallController(args.Game);
+        }
+
         public override IEnumerable<GameMetadata> GetGames(LibraryGetGamesArgs args)
         {
             // If the Addon is not enabled, return empty list.
@@ -78,29 +93,38 @@ namespace MoonlightAppImport
                 string hostname = httpClient.GetServerHostnameAsync().GetAwaiter().GetResult();
                 _logger.Info($"Successfully retrieved the hostname: {hostname}");
 
-                MoonlightApps response = httpClient.GetGamesAsync().GetAwaiter().GetResult();
+                MoonlightApps newGames = httpClient.GetGamesAsync().GetAwaiter().GetResult();
                 List<GameMetadata> metadata = new List<GameMetadata>();
 
-                foreach (App app in response.apps)
+                // Cache the resolved GameIds to ensure we don't encounter null references during LINQ comparisons
+                var parsedNewGames = newGames.apps.Select(app => new
+                {
+                    App = app,
+                    GameId = app.uuid ?? $"{hostname}-{app.name}"
+                }).ToList();
+
+                _logger.Info($"The server returned a total of {parsedNewGames.Count} games.");
+
+                // 1. Add all apps from the server and mark them as installed
+                foreach (var parsed in parsedNewGames)
                 {
                     var gameMetadata = new GameMetadata()
                     {
-                        Name = app.name,
-                        GameId = app.uuid ?? $"{hostname}-{app.name}",
-                        GameActions =
-                            new List<GameAction>()
+                        Name = parsed.App.name,
+                        GameId = parsed.GameId,
+                        GameActions = new List<GameAction>()
+                        {
+                            new GameAction()
                             {
-                                new GameAction()
-                                {
-                                    Name = app.name,
-                                    IsPlayAction = true,
-                                    Type = GameActionType.File,
-                                    Path = _settings.Settings.MoonlightPath,
-                                    Arguments = $"stream \"{hostname}\" \"{app.name}\""
-                                }
-                            },
-                        InstallDirectory = $"Sunshine server {hostname}",
-                        IsInstalled = true,
+                                Name = parsed.App.name,
+                                IsPlayAction = true,
+                                Type = GameActionType.File,
+                                Path = _settings.Settings.MoonlightPath,
+                                Arguments = $"stream \"{hostname}\" \"{parsed.App.name}\""
+                            }
+                        },
+                        InstallDirectory = $"{_settings.Settings.ServerType} server {hostname}",
+                        IsInstalled = true
                     };
 
                     // Add metadata if configured
@@ -112,9 +136,53 @@ namespace MoonlightAppImport
                     }
 
                     metadata.Add(gameMetadata);
-                    _logger.Info($"Added App \"{app.name}\" from Sunshine server \"{hostname}\" to the import list.");
+                    _logger.Info($"Added App \"{parsed.App.name}\" ({parsed.App.uuid}) from the {_settings.Settings.ServerType} server \"{hostname}\" to the import list.");
                 }
 
+                // 2. Process games that are in the Playnite database but no longer exist on the server
+                if (_settings.Settings.RemoveGames)
+                {
+                    // Retrieve all installed games from the Playnite database that were imported by this plugin
+                    var oldGames = PlayniteApi.Database.Games
+                        .Where(g => g.PluginId == Id)
+                        .ToList();
+
+                    var gamesNoLongerOnServer = oldGames.Where(old => !parsedNewGames.Any(n => n.GameId == old.GameId)).ToList();
+
+                    if (gamesNoLongerOnServer.Count > 0)
+                    {
+                        if (_settings.Settings.RemoveType == RemoveType.Uninstall)
+                        {
+                            // To uninstall cleanly during sync, return the game with IsInstalled set to false.
+                            // Playnite will process this without triggering background uninstall tasks.
+                            _logger.Info($"The setting to uninstall games is enabled. Games that are no longer present on the {_settings.Settings.ServerType} server \"{hostname}\" will be marked as uninstalled.");
+                            foreach (var oldGame in gamesNoLongerOnServer.Where(g => g.IsInstalled))
+                            {
+                                metadata.Add(new GameMetadata
+                                {
+                                    GameId = oldGame.GameId,
+                                    Name = oldGame.Name,
+                                    IsInstalled = false
+                                });
+                                _logger.Info($"Game \"{oldGame.Name}\" is no longer present on the server. Marked as uninstalled.");
+                            }
+                        }
+                        else if (_settings.Settings.RemoveType == RemoveType.Remove)
+                        {
+                            // Use BufferedUpdate to prevent massive UI stuttering when deleting multiple items at once
+                            _logger.Info($"The setting to remove games is enabled. Games that are no longer present on the {_settings.Settings.ServerType} server \"{hostname}\" will be removed from Playnite.");
+                            using (PlayniteApi.Database.BufferedUpdate())
+                            {
+                                foreach (var oldGame in gamesNoLongerOnServer)
+                                {
+                                    PlayniteApi.Database.Games.Remove(oldGame.Id);
+                                    _logger.Info($"Game \"{oldGame.Name}\" is no longer present on the server. Removed completely from DB.");
+                                }
+                            }
+                        }
+                    }
+                }
+                               
                 return metadata;
             }
             catch (Exception ex)
@@ -138,5 +206,37 @@ namespace MoonlightAppImport
             return new MoonlightAppImportSettingsView();
         }
         #endregion
+    }
+
+    /// <summary>
+    /// Handles the pseudo-installation process for Moonlight remote applications.
+    /// </summary>
+    public class MyInstallController : InstallController
+    {
+        public MyInstallController(Game game) : base(game)
+        {
+        }
+
+        public override void Install(InstallActionArgs args)
+        {
+            // Triggers Playnites internal events to properly update the UI and state
+            InvokeOnInstalled(new GameInstalledEventArgs());
+        }
+    }
+
+    /// <summary>
+    /// Handles the pseudo-uninstallation process for Moonlight remote applications.
+    /// </summary>
+    public class MyUninstallController : UninstallController
+    {
+        public MyUninstallController(Game game) : base(game)
+        {
+        }
+
+        public override void Uninstall(UninstallActionArgs args)
+        {
+            // Triggers Playnites internal events to properly update the UI and state
+            InvokeOnUninstalled(new GameUninstalledEventArgs());
+        }
     }
 }
